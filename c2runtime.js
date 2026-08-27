@@ -24918,15 +24918,15 @@ cr.plugins_.vooxe = function(runtime)
             };
             (function() {
                 // LOCAL STUB (offline cleanup): replaces GameDistribution CDN SDK (ads/trackers).
-                // Fires the same lifecycle events the game expects, with no network.
+                // showBanner/play must fire SDK_GAME_START or game stays paused after first Play.
                 var opts = window['GD_OPTIONS'] || {};
                 var handler = opts['onEvent'] || function(){};
-                window['gdsdk'] = {
-                    'showBanner': function(){},
-                    'play': function(){},
-                    'showAd': function(){ return Promise.resolve(); }
-                };
                 function fire(name){ try { handler({'name': name}); } catch(e){} }
+                window['gdsdk'] = {
+                    'showBanner': function(){ setTimeout(function(){ fire('SDK_GAME_START'); }, 30); },
+                    'play': function(){ setTimeout(function(){ fire('SDK_GAME_START'); }, 30); },
+                    'showAd': function(){ setTimeout(function(){ fire('SDK_GAME_START'); }, 30); return Promise.resolve(); }
+                };
                 setTimeout(function(){ fire('SDK_READY'); }, 0);
                 setTimeout(function(){ fire('SDK_GAME_START'); }, 50);
             }());
