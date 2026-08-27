@@ -1,30 +1,20 @@
-# Brick Breaker — Nettoyé
+# Brick Breaker
 
-Jeu 2D de casse-briques (HTML5 / Construct 2).
+Casse-briques arcade en 2D (HTML5 / Construct 2).
 
-## Moteur détecté
-- **Construct 2** (`c2runtime.js`, `data.js`, jQuery 2.1.1)
-- Canvas WebGL/2D, rendu plein écran responsif
-- Boucle interne Construct 2 (`cr_createRuntime`)
+## Description
+Renvoie la balle avec la raquette pour détruire toutes les briques du niveau. Enchaîne les rebonds, attrape les bonus qui tombent et vide l'écran avant de perdre toutes les vies.
 
-## Architecture générale
-- `index.html` — entrée, `<canvas id="c2canvas">`, balises meta viewport
-- `c2runtime.js` — moteur Construct 2 (minifié)
-- `data.js` — données du projet (layouts, objets, images, sons)
-- `jquery-2.1.1.min.js` — requis par Construct 2
-- `images/` — sprites (sheet0)
-- `media/` — sons (ogg)
+## Contrôles
+- **Souris / Tactile** : déplacer la raquette (glisser horizontalement)
+- **Clic / Tap** : lancer la balle au départ, relancer après une vie perdue
+- **P** ou bouton Pause : mettre en pause / reprendre
+- **M** : couper / remettre le son et la musique
+- **F** : plein écran (si disponible)
 
-## Nettoyage effectué
-- Retiré : SDK publicitaire GameDistribution (`html5.api.gamedistribution.com/main.min.js`)
-  et tous ses trackers (gamedock, atom.dmp, google analytics, headerlift, improvedigital…)
-- Injecté **stub local `window.gdsdk`** dans `c2runtime.js` qui émet les events
-  `SDK_READY` + `SDK_GAME_START` (le jeu démarre sans le CDN de pub)
-- `viewport` déjà correct (`user-scalable=no`, fond `#000`)
-- Copie physique de tous les assets (aucun symlink)
+## Stack
+- `c2runtime.js` + `data.js` (Construct 2), `jquery-2.1.1.min.js`
+- `images/` : sprites du jeu
+- `media/` : effets sonores
 
-## Test
-- Chargement OK, 0 erreur JS, 0 ressource manquante (Xvfb Chromium)
-- Desktop 1280×720 et mobile portrait 390×844 : canvas actif, pas de white bar / scroll horizontal
-- Les 6 fichiers audio absents du serveur d'origine (shot/speedball/startgame/time/totalscore/)
-  sont gérés en silence par Construct 2 (aucun impact au jeu)
+> Nettoyage : SDK pub GameDistribution et trackers supprimés, remplacés par un stub local `window.gdsdk` (aucun appel externe). Fichiers `offlineClient.js` et `loading-logo.png` inutiles retirés, manifest/icônes morts supprimés de `index.html`.
