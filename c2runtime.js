@@ -24838,6 +24838,9 @@ cr.plugins_.vooxe = function(runtime)
 };
 (function ()
 {
+	// OFFLINE CLEANUP: the Gamedistribution.com SDK (ads/trackers/network) has been fully removed.
+	// All SDK methods are now no-ops. The game runs without banners; isShowingBannerAd stays false
+	// so gameplay is never paused waiting for an ad SDK that no longer exists.
 	var pluginProto = cr.plugins_.vooxe.prototype;
 	pluginProto.Type = function(plugin)
 	{
@@ -24852,85 +24855,11 @@ cr.plugins_.vooxe = function(runtime)
 	{
 		this.type = type;
 		this.runtime = type.runtime;
-		window["vooxe"]={};
-		window["GD_OPTIONS"]={};
 	};
 	var instanceProto = pluginProto.Instance.prototype;
-	var isSupported = false;
 	instanceProto.onCreate = function()
 	{
-		if (!window["vooxe"] && !window["GD_OPTIONS"])
-		{
-			cr.logexport("[Construct 2] Gamedistribution.com SDK is required to show advertisements within Cordova; other platforms are not supported.");
-			return;
-		}
-		isSupported = true;
-		this.vooxe = window["vooxe"];
-		var self = this;
-		this.vooxe["onInit"] = function ()
-		{
-            cr.logexport("Gamedistribution.com SDK: onInit");
-			self.isShowingBannerAd = false;
-			self.runtime.trigger(cr.plugins_.vooxe.prototype.cnds.onInit, self);
-		};
-		this.vooxe["onError"] = function ()
-		{
-			cr.logexport("Gamedistribution.com SDK: onError");
-			self.isShowingBannerAd = true;
-			self.runtime.trigger(cr.plugins_.vooxe.prototype.cnds.onError, self);
-		};
-		this.vooxe["onResumeGame"] = function ()
-		{
-			cr.logexport("Gamedistribution.com SDK: onResume");
-			self.isShowingBannerAd = false;
-			self.runtime.trigger(cr.plugins_.vooxe.prototype.cnds.onResumeGame, self);
-		};
-		this.vooxe["onPauseGame"] = function ()
-		{
-			cr.logexport("Gamedistribution.com SDK: onPauseGame");
-			self.isShowingBannerAd = true;
-			self.runtime.trigger(cr.plugins_.vooxe.prototype.cnds.onPauseGame, self);
-		};
-		this.vooxe["InitAds"] = function ()
-		{
-            window["GD_OPTIONS"] = {
-                "gameId": self.properties[0],
-                "userId": self.properties[1],
-                "advertisementSettings": {
-                    "autoplay": false
-                },
-                "onEvent": function(event) {
-                    switch (event.name) {
-                        case "SDK_GAME_START":
-                            self.vooxe["onResumeGame"]();
-                            break;
-                        case "SDK_GAME_PAUSE":
-                            self.vooxe["onPauseGame"]();
-                            break;
-                        case "SDK_READY":
-                            self.vooxe["onInit"]();
-                            break;
-                        case "SDK_ERROR":
-                            self.vooxe["onError"]();
-                            break;
-                    }
-                }
-            };
-            (function() {
-                // LOCAL STUB (offline cleanup): replaces GameDistribution CDN SDK (ads/trackers).
-                // showBanner/play must fire SDK_GAME_START or game stays paused after first Play.
-                var opts = window['GD_OPTIONS'] || {};
-                var handler = opts['onEvent'] || function(){};
-                function fire(name){ try { handler({'name': name}); } catch(e){} }
-                window['gdsdk'] = {
-                    'showBanner': function(){ setTimeout(function(){ fire('SDK_GAME_START'); }, 30); },
-                    'play': function(){ setTimeout(function(){ fire('SDK_GAME_START'); }, 30); },
-                    'showAd': function(){ setTimeout(function(){ fire('SDK_GAME_START'); }, 30); return Promise.resolve(); }
-                };
-                setTimeout(function(){ fire('SDK_READY'); }, 0);
-                setTimeout(function(){ fire('SDK_GAME_START'); }, 50);
-            }());
-		}
+		this.isShowingBannerAd = false;
 	};
 	function Cnds() {};
 	Cnds.prototype.IsShowingBanner = function()
@@ -24957,50 +24886,34 @@ cr.plugins_.vooxe = function(runtime)
 	function Acts() {};
 	Acts.prototype.ShowBanner = function ()
 	{
-		if (!isSupported) return;
-		if (typeof (window["gdsdk"]["showBanner"]) === "undefined")
-		{
-			cr.logexport("Gamedistribution.com SDK is not loaded or an ad blocker is present.");
-			this.vooxe["onResumeGame"]();
-			return;
-		}
-        window["gdsdk"]["showBanner"]();
-		cr.logexport("ShowBanner");
+		// SDK removed: replicate the original ad lifecycle so the event sheet proceeds.
+		// Original: ShowBanner sets banner shown (true), then when the ad ends the SDK fires
+		// SDK_GAME_START -> onResumeGame which sets it false and starts gameplay. We do both
+		// synchronously with no network/ad.
 		this.isShowingBannerAd = true;
+		this.isShowingBannerAd = false;
+		this.runtime.trigger(cr.plugins_.vooxe.prototype.cnds.onResumeGame, this);
 	};
 	Acts.prototype.PlayLog = function ()
 	{
-		if (!isSupported) return;
-		if (typeof (window["gdsdk"]["play"]) === "undefined")
-		{
-			cr.logexport("Gamedistribution.com SDK is not loaded.");
-			this.vooxe["onResumeGame"]();
-			return;
-		}
-        window['gdsdk']["play"]();
+		this.isShowingBannerAd = false;
+		this.runtime.trigger(cr.plugins_.vooxe.prototype.cnds.onResumeGame, this);
 	};
 	Acts.prototype.CustomLog = function ()
 	{
-		if (!isSupported) return;
-		if (typeof (window['gdsdk']["customLog"]) === "undefined")
-		{
-			cr.logexport("Gamedistribution.com SDK is not loaded.");
-			this.vooxe["onResumeGame"]();
-			return;
-		}
-        window['gdsdk']["customLog"]();
+		this.isShowingBannerAd = false;
+		this.runtime.trigger(cr.plugins_.vooxe.prototype.cnds.onResumeGame, this);
 	};
 	Acts.prototype.InitAds = function ()
 	{
-		if (!isSupported) return;
-		this.vooxe["InitAds"]();
+		this.isShowingBannerAd = false;
+		this.runtime.trigger(cr.plugins_.vooxe.prototype.cnds.onInit, this);
 	};
 	pluginProto.acts = new Acts();
 	function Exps() {};
 	pluginProto.exps = new Exps();
 }());
-;
-;
+
 cr.behaviors.Bullet = function(runtime)
 {
 	this.runtime = runtime;
