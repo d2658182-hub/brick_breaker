@@ -1,6 +1,6 @@
-# Brick Breaker
+# Brick Smash
 
-The timeless arcade legend is back — bolder, brighter and more addictive than ever! **Brick Breaker** drops you into a dazzling wall of colorful bricks where every bounce counts. Guide your paddle with pixel-perfect precision, keep the ball alive and watch the whole screen explode in a cascade of points, particles and surprises.
+The timeless arcade legend is back — bolder, brighter and more addictive than ever! **Brick Smash** drops you into a dazzling wall of colorful bricks where every bounce counts. Guide your paddle with pixel-perfect precision, keep the ball alive and watch the whole screen explode in a cascade of points, particles and surprises.
 
 Feel the rush as hidden bonuses rain down: expand your paddle to impossible size, unleash fireballs that melt bricks, clone the ball for crazy multiball chaos, or slow time itself. Each level is a new puzzle of angles and reflexes, each life a chance to push your score even higher. Retro feel, modern polish — pure arcade bliss that never gets old.
 
